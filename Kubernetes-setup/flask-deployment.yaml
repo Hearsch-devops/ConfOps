@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: flask
-          image: 95337/confroom-backend:latest
+          image: 95337/conference-backend:latest
           ports:
             - containerPort: 5000
           resources:
