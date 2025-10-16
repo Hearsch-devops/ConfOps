@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conference Room Booking</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            animation: fadeIn 0.8s ease-in;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .rooms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .room-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        .room-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+        }
+
+        .room-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+            color: white;
+        }
+
+        .room-content {
+            padding: 25px;
+        }
+
+        .room-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .room-content h2 {
+            color: #333;
+            font-size: 1.5em;
+        }
+
+        .attendees-badge {
+            background: #667eea;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .room-info {
+            display: flex;
+            gap: 20px;
+            margin: 15px 0;
+            color: #666;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .status.available {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.occupied {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #666;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .booking-form, .change-reservation-form {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: fadeIn 0.8s ease-in;
+            margin-bottom: 30px;
+        }
+
+        .booking-form h2, .change-reservation-form h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .price-display {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 2px solid #667eea;
+        }
+
+        .price-display .price-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .price-display .price-amount {
+            color: #667eea;
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2em;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .rooms-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📋 Conference Room Booking</h1>
+            <p>Reserve your perfect meeting space</p>
+        </header>
+
+        <div id="alertContainer"></div>
+
+        <div class="rooms-grid" id="roomsGrid">
+            <div class="room-card">
+                <div class="room-image">🏢</div>
+                <div class="room-content">
+                    <div class="room-header">
+                        <h2>Executive Board Room</h2>
+                        <span class="attendees-badge">👥 12</span>
+                    </div>
+                    <div class="room-info">
+                        <div class="info-item">📍 Floor 5</div>
+                        <div class="info-item">₹1000/30min</div>
+                    </div>
+                    <span class="status available">Available</span>
+                    <p style="color: #666; margin: 10px 0;">Premium board room with video conferencing and whiteboard</p>
+                    <button class="btn btn-primary" onclick="openBookingForm(1, 'Executive Board Room')">Book Now</button>
+                </div>
+            </div>
+
+            <div class="room-card">
+                <div class="room-image">💼</div>
+                <div class="room-content">
+                    <div class="room-header">
+                        <h2>Innovation Hub</h2>
+                        <span class="attendees-badge">👥 8</span>
+                    </div>
+                    <div class="room-info">
+                        <div class="info-item">📍 Floor 3</div>
+                        <div class="info-item">₹1500/30min</div>
+                    </div>
+                    <span class="status available">Available</span>
+                    <p style="color: #666; margin: 10px 0;">Creative space with brainstorming tools and collaboration tech</p>
+                    <button class="btn btn-primary" onclick="openBookingForm(2, 'Innovation Hub')">Book Now</button>
+                </div>
+            </div>
+
+            <div class="room-card">
+                <div class="room-image">🎯</div>
+                <div class="room-content">
+                    <div class="room-header">
+                        <h2>Focus Room</h2>
+                        <span class="attendees-badge">👥 4</span>
+                    </div>
+                    <div class="room-info">
+                        <div class="info-item">📍 Floor 2</div>
+                        <div class="info-item">₹500/30min</div>
+                    </div>
+                    <span class="status available">Available</span>
+                    <p style="color: #666; margin: 10px 0;">Small meeting room perfect for team discussions</p>
+                    <button class="btn btn-primary" onclick="openBookingForm(3, 'Focus Room')">Book Now</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking Form -->
+        <div class="booking-form" id="bookingForm">
+            <h2>📅 Book Conference Room</h2>
+            <form onsubmit="handleBookingSubmit(event)">
+                <div class="form-group">
+                    <label for="roomId">Room Name</label>
+                    <select id="roomId" required onchange="updatePricing()">
+                        <option value="">Select a room</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="name">Your Name</label>
+                        <input type="text" id="name" required placeholder="Enter your name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" required placeholder="your.email@company.com">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="date">Date</label>
+                        <input type="date" id="date" required onchange="checkAvailability()">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="time">Time</label>
+                        <input type="time" id="time" required onchange="checkAvailability()">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="duration">Duration</label>
+                        <select id="duration" required onchange="updatePricing()">
+                            <option value="">Select duration</option>
+                            <option value="30">30 minutes</option>
+                            <option value="60">1 hour</option>
+                            <option value="90">1.5 hours</option>
+                            <option value="120">2 hours</option>
+                            <option value="180">3 hours</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="attendees">Number of Attendees</label>
+                        <input type="number" id="attendees" required min="1" placeholder="0">
+                    </div>
+                </div>
+
+                <div class="price-display">
+                    <div class="price-label">Total Price:</div>
+                    <div class="price-amount" id="priceAmount">₹0</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="purpose">Meeting Purpose</label>
+                    <textarea id="purpose" rows="3" placeholder="Brief description of the meeting"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Confirm Booking</button>
+            </form>
+        </div>
+
+        <!-- Change Reservation Form -->
+        <div class="change-reservation-form" id="changeReservationForm">
+            <h2>🔄 Change Reservation</h2>
+            <div class="alert alert-info">
+                You can change your reservation only once. Enter your booking ID to modify your reservation.
+            </div>
+            
+            <form onsubmit="handleChangeReservation(event)">
+                <div class="form-group">
+                    <label for="bookingId">Booking ID</label>
+                    <input type="number" id="bookingId" required placeholder="Enter your booking ID">
+                </div>
+                <button type="button" class="btn btn-secondary" onclick="loadBookingDetails()">Load Booking</button>
+            </form>
+
+            <div id="changeFormDetails" class="hidden" style="margin-top: 30px;">
+                <div class="alert alert-info">
+                    Note: You cannot change the conference room. You can only modify date, time, and duration.
+                </div>
+                <form onsubmit="handleUpdateBooking(event)">
+                    <div class="form-group">
+                        <label for="changeRoomName">Room Name (Cannot be changed)</label>
+                        <input type="text" id="changeRoomName" readonly style="background-color: #f0f0f0;">
+                        <input type="hidden" id="changeRoomId">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="changeDate">Date</label>
+                            <input type="date" id="changeDate" required onchange="checkChangeAvailability()">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="changeTime">Time</label>
+                            <input type="time" id="changeTime" required onchange="checkChangeAvailability()">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="changeDuration">Duration</label>
+                            <select id="changeDuration" required onchange="updateChangePricing()">
+                                <option value="">Select duration</option>
+                                <option value="30">30 minutes</option>
+                                <option value="60">1 hour</option>
+                                <option value="90">1.5 hours</option>
+                                <option value="120">2 hours</option>
+                                <option value="180">3 hours</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="changeAttendees">Number of Attendees</label>
+                            <input type="number" id="changeAttendees" required min="1" placeholder="0">
+                        </div>
+                    </div>
+
+                    <div class="price-display">
+                        <div class="price-label">Total Price:</div>
+                        <div class="price-amount" id="changePriceAmount">₹0</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="changePurpose">Meeting Purpose</label>
+                        <textarea id="changePurpose" rows="3" placeholder="Brief description of the meeting"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Update Reservation</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://192.168.48.153:30500/api';
+        const ROOM_PRICING = {
+            'Executive Board Room': 1000,
+            'Innovation Hub': 1500,
+            'Focus Room': 500
+        };
+
+        let roomsData = [
+            {id: 1, name: 'Executive Board Room', capacity: 12, floor: 5, description: 'Premium board room with video conferencing and whiteboard', is_available: true},
+            {id: 2, name: 'Innovation Hub', capacity: 8, floor: 3, description: 'Creative space with brainstorming tools and collaboration tech', is_available: true},
+            {id: 3, name: 'Focus Room', capacity: 4, floor: 2, description: 'Small meeting room perfect for team discussions', is_available: true}
+        ];
+
+        // Load rooms on page load
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadRooms();
+            setMinDate();
+        });
+
+        function setMinDate() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('date').setAttribute('min', today);
+            document.getElementById('changeDate').setAttribute('min', today);
+        }
+
+        async function loadRooms() {
+            try {
+                const response = await fetch(`${API_URL}/rooms`);
+                const data = await response.json();
+                if (data && data.length > 0) {
+                    roomsData = data;
+                }
+                populateRoomSelects(roomsData);
+            } catch (error) {
+                console.log('Using default rooms data');
+                populateRoomSelects(roomsData);
+            }
+        }
+
+        function populateRoomSelects(rooms) {
+            const bookingSelect = document.getElementById('roomId');
+            
+            const options = rooms.map(room => 
+                `<option value="${room.id}">${room.name} (Capacity: ${room.capacity})</option>`
+            ).join('');
+            
+            bookingSelect.innerHTML = '<option value="">Select a room</option>' + options;
+        }
+
+        function openBookingForm(roomId, roomName) {
+            document.getElementById('roomId').value = roomId;
+            updatePricing();
+            document.getElementById('bookingForm').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function updatePricing() {
+            const roomId = document.getElementById('roomId').value;
+            const duration = parseInt(document.getElementById('duration').value) || 0;
+            
+            if (roomId && duration) {
+                const room = roomsData.find(r => r.id == roomId);
+                if (room) {
+                    const basePrice = ROOM_PRICING[room.name];
+                    const totalPrice = (basePrice / 30) * duration;
+                    document.getElementById('priceAmount').textContent = `₹${totalPrice.toFixed(0)}`;
+                }
+            }
+        }
+
+        function updateChangePricing() {
+            const roomId = document.getElementById('changeRoomId').value;
+            const duration = parseInt(document.getElementById('changeDuration').value) || 0;
+            
+            if (roomId && duration) {
+                const room = roomsData.find(r => r.id == roomId);
+                if (room) {
+                    const basePrice = ROOM_PRICING[room.name];
+                    const totalPrice = (basePrice / 30) * duration;
+                    document.getElementById('changePriceAmount').textContent = `₹${totalPrice.toFixed(0)}`;
+                }
+            }
+        }
+
+        async function checkAvailability() {
+            const roomId = document.getElementById('roomId').value;
+            const date = document.getElementById('date').value;
+            const time = document.getElementById('time').value;
+            const duration = parseInt(document.getElementById('duration').value) || 0;
+
+            if (roomId && date && time && duration) {
+                try {
+                    const response = await fetch(`${API_URL}/bookings/check-availability`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ room_id: roomId, date, time, duration })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (!result.available) {
+                        showAlert('This time slot is already booked. Please select another time or room.', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error checking availability:', error);
+                }
+            }
+        }
+
+        async function checkChangeAvailability() {
+            const roomId = document.getElementById('changeRoomId').value;
+            const date = document.getElementById('changeDate').value;
+            const time = document.getElementById('changeTime').value;
+            const duration = parseInt(document.getElementById('changeDuration').value) || 0;
+            const bookingId = document.getElementById('bookingId').value;
+
+            if (roomId && date && time && duration) {
+                try {
+                    const response = await fetch(`${API_URL}/bookings/check-availability`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            room_id: roomId, 
+                            date, 
+                            time, 
+                            duration,
+                            exclude_booking_id: bookingId 
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (!result.available) {
+                        showAlert('This time slot is already booked. Please select another time or room.', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error checking availability:', error);
+                }
+            }
+        }
+
+        async function handleBookingSubmit(e) {
+            e.preventDefault();
+            
+            const bookingData = {
+                room_id: parseInt(document.getElementById('roomId').value),
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                date: document.getElementById('date').value,
+                time: document.getElementById('time').value,
+                duration: parseInt(document.getElementById('duration').value),
+                attendees: parseInt(document.getElementById('attendees').value),
+                purpose: document.getElementById('purpose').value
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/bookings`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(bookingData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showAlert(`Booking Confirmed! Your Booking ID is: ${result.id}. Save this ID to change your reservation.`, 'success');
+                    e.target.reset();
+                    document.getElementById('priceAmount').textContent = '₹0';
+                } else {
+                    showAlert(result.error || 'Booking failed. Please try again.', 'error');
+                }
+            } catch (error) {
+                showAlert('Error creating booking: ' + error.message, 'error');
+            }
+        }
+
+        async function loadBookingDetails() {
+            const bookingId = document.getElementById('bookingId').value;
+            
+            if (!bookingId) {
+                showAlert('Please enter a booking ID', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/bookings/${bookingId}`);
+                
+                if (!response.ok) {
+                    showAlert('Booking not found', 'error');
+                    return;
+                }
+
+                const booking = await response.json();
+                
+                if (booking.modification_count >= 1) {
+                    showAlert('This booking has already been modified once. No further changes allowed.', 'error');
+                    return;
+                }
+
+                // Populate change form - Room cannot be changed
+                const room = roomsData.find(r => r.id === booking.room_id);
+                document.getElementById('changeRoomName').value = room ? room.name : booking.room_name;
+                document.getElementById('changeRoomId').value = booking.room_id;
+                document.getElementById('changeDate').value = booking.date;
+                document.getElementById('changeTime').value = booking.time;
+                document.getElementById('changeDuration').value = booking.duration;
+                document.getElementById('changeAttendees').value = booking.attendees;
+                document.getElementById('changePurpose').value = booking.purpose || '';
+                
+                updateChangePricing();
+                document.getElementById('changeFormDetails').classList.remove('hidden');
+                
+                showAlert('Booking loaded successfully. You can modify date, time, and duration once.', 'success');
+            } catch (error) {
+                showAlert('Error loading booking: ' + error.message, 'error');
+            }
+        }
+
+        async function handleUpdateBooking(e) {
+            e.preventDefault();
+            
+            const bookingId = document.getElementById('bookingId').value;
+            const updateData = {
+                date: document.getElementById('changeDate').value,
+                time: document.getElementById('changeTime').value,
+                duration: parseInt(document.getElementById('changeDuration').value),
+                attendees: parseInt(document.getElementById('changeAttendees').value),
+                purpose: document.getElementById('changePurpose').value
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/bookings/${bookingId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updateData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showAlert('Reservation updated successfully! This was your one-time modification.', 'success');
+                    document.getElementById('changeFormDetails').classList.add('hidden');
+                    document.getElementById('bookingId').value = '';
+                } else {
+                    showAlert(result.error || 'Update failed. Please try again.', 'error');
+                }
+            } catch (error) {
+                showAlert('Error updating booking: ' + error.message, 'error');
+            }
+        }
+
+        function showAlert(message, type) {
+            const container = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            container.appendChild(alert);
+            
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+            
+            container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    </script>
+</body>
+</html>
