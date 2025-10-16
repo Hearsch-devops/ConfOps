@@ -33,6 +33,8 @@ deploy:
   image: alpine/k8s:1.29.15
   dependencies:
     - build
+  before_script:
+  - export KUBECONFIG=/home/ubuntu/.kube/config
   script:
     - mkdir -p /root/.kube
     - echo "$KUBE_CONFIG" | base64 -d > /root/.kube/config
