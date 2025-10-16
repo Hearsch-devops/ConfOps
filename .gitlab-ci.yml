@@ -34,7 +34,9 @@ deploy:
   dependencies:
     - build
   before_script:
-  - export KUBECONFIG=/home/ubuntu/.kube/config
+    - export KUBECONFIG="$KUBECONFIG_CONTENT"
+    - echo "Using kubeconfig:"
+    - kubectl config view
   script:
     - mkdir -p /root/.kube
     - echo "$KUBE_CONFIG" | base64 -d > /root/.kube/config
