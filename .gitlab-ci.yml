@@ -34,12 +34,12 @@ deploy:
   dependencies:
     - build
   script:
-    - echo "Preparing kubeconfig from KUBE_CONFIG CI variable"
     - mkdir -p /root/.kube
     - echo "$KUBE_CONFIG" | base64 -d > /root/.kube/config
+    - kubectl get nodes
     - kubectl apply -f Kubernetes-setup/
-    - echo "Updating Flask deployment image to $IMAGE_NAME:$CI_COMMIT_SHORT_SHA"
-    - kubectl set image deployment/flask-deployment flask="$IMAGE_NAME:$CI_COMMIT_SHORT_SHA" --record || true
+    - kubectl set image deployment/flask-deployment flask="$IMAGE_NAME:$CI_COMMIT_SHORT_SHA" --record
+    - kubectl rollout status deployment/flask-deployment
   only:
     - main
     - master
