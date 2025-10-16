@@ -3,9 +3,7 @@ stages:
   - deploy
 
 variables:
-  # Default image name (can be overridden in GitLab CI variables)
   IMAGE_NAME: "${DOCKER_USERNAME}/conference-backend"
-  # Ensure docker-in-docker works
   DOCKER_TLS_CERTDIR: ""
 
 build:
@@ -13,8 +11,6 @@ build:
   image: docker:24.0.2
   services:
     - name: docker:24-dind
-  variables:
-    DOCKER_TLS_CERTDIR: ""
   before_script:
     - echo "Logging into Docker Hub"
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
@@ -34,13 +30,15 @@ deploy:
   dependencies:
     - build
   before_script:
-    - export KUBECONFIG="$KUBE_CONFIG"
+    - mkdir -p ~/.kube
+    - echo "$KUBE_CONFIG" | base64 -d > ~/.kube/config
+    - export KUBECONFIG=~/.kube/config
     - echo "Using kubeconfig:"
     - kubectl config view
+    # Optional but helpful for debugging
+    - kubectl cluster-info --insecure-skip-tls-verify
   script:
-    - mkdir -p /root/.kube
-    - echo "$KUBE_CONFIG" | base64 -d > /root/.kube/config
-    - kubectl get nodes
+    - kubectl get nodes --insecure-skip-tls-verify
     - kubectl apply -f Kubernetes-setup/
     - kubectl set image deployment/flask-deployment flask="$IMAGE_NAME:$CI_COMMIT_SHORT_SHA" --record
     - kubectl rollout status deployment/flask-deployment
