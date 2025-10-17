@@ -3,6 +3,8 @@ FROM python:3.11-slim
 COPY Conference-setup/app.py /app/
 WORKDIR /app
 
+COPY templates/ /app/templates/
+
 # Install dependencies
 COPY Conference-setup/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
