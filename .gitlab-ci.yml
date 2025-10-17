@@ -9,6 +9,9 @@ variables:
 build:
   stage: build
   image: docker:24.0.2
+  tags:
+    - "conf"
+    - "room"
   services:
     - name: docker:24-dind
   before_script:
@@ -25,18 +28,15 @@ build:
     - master
 
 deploy:
-  stage: deploy
   image: alpine/k8s:1.29.15
-  dependencies:
-    - build
+  tags:
+    - "conf"
+    - "room"
+  stage: deploy
   before_script:
-    - mkdir -p ~/.kube
-    - echo "$KUBE_CONFIG" | base64 -d > ~/.kube/config
-    - export KUBECONFIG=~/.kube/config
+    - export KUBECONFIG="$KUBE_CONFIG"
     - echo "Using kubeconfig:"
     - kubectl config view
-    # Optional but helpful for debugging
-    - kubectl cluster-info --insecure-skip-tls-verify
   script:
     - kubectl get nodes --insecure-skip-tls-verify
     - kubectl apply -f Kubernetes-setup/
