@@ -10,7 +10,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: manual
   nfs:
-    path: /mnt/nfs/postgres-ConferenceRoomData
+    path: /mnt/nfs/ConferenceRoomData
     server: 192.168.48.144
 ---
 apiVersion: v1
