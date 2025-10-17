@@ -1,5 +1,6 @@
 FROM python:3.11-slim
 
+COPY app.py /app/
 WORKDIR /app
 
 # Install dependencies
