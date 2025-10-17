@@ -9,7 +9,7 @@ CORS(app)
 
 # PostgreSQL Database Configuration
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 
-    'postgresql://conference_user:strongpassword@postgres-service:5432/conference_db')
+    'postgresql://username:password@localhost:5432/conference_db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
