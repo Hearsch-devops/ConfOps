@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from datetime import datetime, timedelta
+from flask import Flask, render_template
 import os
 
 app = Flask(__name__)
@@ -9,7 +10,7 @@ CORS(app)
 
 # PostgreSQL Database Configuration
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 
-    'postgresql://username:password@localhost:5432/conference_db')
+    'postgresql://admin:password@192.168.48.153:5432/conference_db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -129,6 +130,10 @@ def check_time_conflict(room_id, booking_date, booking_time, duration, exclude_b
 
 
 # Routes - Rooms
+@app.route('/')
+def home():
+    return render_template('index.html')
+    
 @app.route('/api/rooms', methods=['GET'])
 def get_rooms():
     """Get all conference rooms"""
