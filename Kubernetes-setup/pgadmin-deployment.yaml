@@ -19,7 +19,7 @@ spec:
             - containerPort: 80
           env:
             - name: PGADMIN_DEFAULT_EMAIL
-              value: admin@nishh.co
+              value: admin@conference.co
             - name: PGADMIN_DEFAULT_PASSWORD
               value: admin123
 ---

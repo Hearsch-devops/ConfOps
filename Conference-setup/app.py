@@ -10,7 +10,7 @@ CORS(app)
 
 # PostgreSQL Database Configuration
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 
-    'postgresql://admin:password@192.168.48.153:5432/conference_db')
+    'postgresql://admin:password@postgres-svc:5432/conference_db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -133,7 +133,7 @@ def check_time_conflict(room_id, booking_date, booking_time, duration, exclude_b
 @app.route('/')
 def home():
     return render_template('index.html')
-    
+
 @app.route('/api/rooms', methods=['GET'])
 def get_rooms():
     """Get all conference rooms"""
