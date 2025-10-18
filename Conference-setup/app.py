@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from datetime import datetime, timedelta
+from flask import Flask, render_template
 import os
 
 app = Flask(__name__)
@@ -129,6 +130,10 @@ def check_time_conflict(room_id, booking_date, booking_time, duration, exclude_b
 
 
 # Routes - Rooms
+@app.route('/')
+def home():
+    return render_template('index.html')
+
 @app.route('/api/rooms', methods=['GET'])
 def get_rooms():
     """Get all conference rooms"""
@@ -212,7 +217,7 @@ def delete_room(room_id):
 
 # Routes - Bookings
 @app.route('/api/bookings', methods=['GET'])
-def get_bookings():
+def list_bookings():  # Changed function name from get_bookings
     """Get all bookings with optional filters"""
     room_id = request.args.get('room_id', type=int)
     date = request.args.get('date')
@@ -223,7 +228,10 @@ def get_bookings():
     if room_id:
         query = query.filter_by(room_id=room_id)
     if date:
-        query = query.filter_by(date=datetime.strptime(date, '%Y-%m-%d').date())
+        try:
+            query = query.filter_by(date=datetime.strptime(date, '%Y-%m-%d').date())
+        except ValueError:
+            return jsonify({'error': 'Invalid date format'}), 400
     if status:
         query = query.filter_by(status=status)
     
@@ -232,16 +240,19 @@ def get_bookings():
 
 
 @app.route('/api/bookings/<int:booking_id>', methods=['GET'])
-def get_booking(booking_id):
+def get_single_booking(booking_id):  # Changed function name
     """Get a specific booking"""
     booking = Booking.query.get_or_404(booking_id)
     return jsonify(booking.to_dict()), 200
 
-
+#check_availability
 @app.route('/api/bookings/check-availability', methods=['POST'])
 def check_availability():
     """Check if a time slot is available"""
     data = request.get_json()
+    
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
     
     required_fields = ['room_id', 'date', 'time', 'duration']
     for field in required_fields:
@@ -272,23 +283,40 @@ def check_availability():
         
     except ValueError as e:
         return jsonify({'error': 'Invalid date or time format'}), 400
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
 
-
+#create_booking
 @app.route('/api/bookings', methods=['POST'])
-def create_booking():
+def create_new_booking():  # Changed function name from create_booking
     """Create a new booking"""
+    
+    # Add debug logging
+    print("=== CREATE BOOKING REQUEST ===")
+    print(f"Content-Type: {request.content_type}")
+    print(f"Method: {request.method}")
+    
     data = request.get_json()
+    print(f"Request data: {data}")
+    
+    if not data:
+        return jsonify({'error': 'No JSON data provided'}), 400
     
     # Validate required fields
     required_fields = ['room_id', 'name', 'email', 'date', 'time', 'duration', 'attendees']
-    for field in required_fields:
-        if field not in data:
-            return jsonify({'error': f'{field} is required'}), 400
+    missing_fields = [field for field in required_fields if field not in data]
+    
+    if missing_fields:
+        return jsonify({'error': f'Missing required fields: {", ".join(missing_fields)}'}), 400
     
     # Check if room exists
     room = Room.query.get(data['room_id'])
     if not room:
         return jsonify({'error': 'Room not found'}), 404
+    
+    # Check if room is available
+    if not room.is_available:
+        return jsonify({'error': 'Room is not available'}), 400
     
     # Check if room has enough capacity
     if data['attendees'] > room.capacity:
@@ -299,8 +327,12 @@ def create_booking():
         booking_date = datetime.strptime(data['date'], '%Y-%m-%d').date()
         booking_time = datetime.strptime(data['time'], '%H:%M').time()
         duration = int(data['duration'])
-    except ValueError:
-        return jsonify({'error': 'Invalid date or time format'}), 400
+    except ValueError as e:
+        return jsonify({'error': f'Invalid date or time format: {str(e)}'}), 400
+    
+    # Validate duration (must be positive and reasonable)
+    if duration <= 0 or duration > 480:  # Max 8 hours
+        return jsonify({'error': 'Duration must be between 1 and 480 minutes'}), 400
     
     # Check for time conflicts
     has_conflict, conflict_message = check_time_conflict(
@@ -331,17 +363,22 @@ def create_booking():
     try:
         db.session.add(booking)
         db.session.commit()
+        print(f"Booking created successfully: {booking.id}")
         return jsonify(booking.to_dict()), 201
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': str(e)}), 400
+        print(f"Error creating booking: {str(e)}")
+        return jsonify({'error': f'Database error: {str(e)}'}), 400
 
-
+#modify_booking
 @app.route('/api/bookings/<int:booking_id>', methods=['PUT'])
-def update_booking(booking_id):
+def modify_booking(booking_id):  # Changed function name
     """Update a booking (only allowed once, room cannot be changed)"""
     booking = Booking.query.get_or_404(booking_id)
     data = request.get_json()
+    
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
     
     # Check if booking has already been modified
     if booking.modification_count >= 1:
@@ -360,12 +397,17 @@ def update_booking(booking_id):
     booking_time = booking.time
     duration = booking.duration
     
-    if 'date' in data:
-        booking_date = datetime.strptime(data['date'], '%Y-%m-%d').date()
-    if 'time' in data:
-        booking_time = datetime.strptime(data['time'], '%H:%M').time()
-    if 'duration' in data:
-        duration = int(data['duration'])
+    try:
+        if 'date' in data:
+            booking_date = datetime.strptime(data['date'], '%Y-%m-%d').date()
+        if 'time' in data:
+            booking_time = datetime.strptime(data['time'], '%H:%M').time()
+        if 'duration' in data:
+            duration = int(data['duration'])
+            if duration <= 0 or duration > 480:
+                return jsonify({'error': 'Duration must be between 1 and 480 minutes'}), 400
+    except ValueError as e:
+        return jsonify({'error': f'Invalid format: {str(e)}'}), 400
     
     # Check for time conflicts (excluding current booking)
     has_conflict, conflict_message = check_time_conflict(
@@ -378,9 +420,10 @@ def update_booking(booking_id):
     # Check room capacity if attendees changed
     if 'attendees' in data:
         room = Room.query.get(booking.room_id)
-        attendees = data['attendees']
+        attendees = int(data['attendees'])
         if attendees > room.capacity:
             return jsonify({'error': f'Room capacity is {room.capacity}, cannot accommodate {attendees} attendees'}), 400
+        booking.attendees = attendees
     
     # Update booking fields
     if 'date' in data:
@@ -391,8 +434,6 @@ def update_booking(booking_id):
         booking.duration = duration
         # Recalculate price if duration changed
         booking.price = calculate_price(booking.room.name, duration)
-    if 'attendees' in data:
-        booking.attendees = data['attendees']
     if 'purpose' in data:
         booking.purpose = data['purpose']
     
@@ -407,9 +448,9 @@ def update_booking(booking_id):
         db.session.rollback()
         return jsonify({'error': str(e)}), 400
 
-
+#remove/delete_booking
 @app.route('/api/bookings/<int:booking_id>', methods=['DELETE'])
-def delete_booking(booking_id):
+def remove_booking(booking_id):  # Changed function name
     """Delete/Cancel a booking"""
     booking = Booking.query.get_or_404(booking_id)
     
@@ -421,7 +462,7 @@ def delete_booking(booking_id):
         db.session.rollback()
         return jsonify({'error': str(e)}), 400
 
-
+#Cancel a booking
 @app.route('/api/bookings/<int:booking_id>/cancel', methods=['POST'])
 def cancel_booking(booking_id):
     """Cancel a booking (soft delete)"""
