@@ -217,23 +217,29 @@ def delete_room(room_id):
 
 # Routes - Bookings
 @app.route('/api/bookings', methods=['POST'])
-def get_bookings():
-    """Get all bookings with optional filters"""
-    room_id = request.args.get('room_id', type=int)
-    date = request.args.get('date')
-    status = request.args.get('status')
-    
-    query = Booking.query
-    
-    if room_id:
-        query = query.filter_by(room_id=room_id)
-    if date:
-        query = query.filter_by(date=datetime.strptime(date, '%Y-%m-%d').date())
-    if status:
-        query = query.filter_by(status=status)
-    
-    bookings = query.order_by(Booking.date.desc(), Booking.time.desc()).all()
-    return jsonify([booking.to_dict() for booking in bookings]), 200
+def create_booking():
+    data = request.get_json()
+
+    try:
+        booking_date = datetime.strptime(data['date'], '%Y-%m-%d').date()
+        booking_time = datetime.strptime(data['time'], '%H:%M').time()
+        new_booking = Booking(
+            room_id=data['room_id'],
+            name=data['name'],
+            email=data['email'],
+            date=booking_date,
+            time=booking_time,
+            duration=data['duration'],
+            attendees=data['attendees'],
+            purpose=data.get('purpose', ''),
+            modification_count=0,
+            status='confirmed'
+        )
+        db.session.add(new_booking)
+        db.session.commit()
+        return jsonify({"id": new_booking.id}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
 
 
 @app.route('/api/bookings/<int:booking_id>', methods=['GET'])
