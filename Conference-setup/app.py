@@ -216,7 +216,7 @@ def delete_room(room_id):
 
 
 # Routes - Bookings
-@app.route('/api/bookings', methods=['GET'])
+@app.route('/api/bookings', methods=['POST'])
 def get_bookings():
     """Get all bookings with optional filters"""
     room_id = request.args.get('room_id', type=int)
