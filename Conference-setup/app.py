@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+import traceback
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from datetime import datetime, timedelta
@@ -523,3 +524,11 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     app.run(debug=True, host='0.0.0.0', port=5000)
+
+
+@app.errorhandler(Exception)
+def handle_uncaught_exception(e):
+    """Return JSON for any uncaught exception and print traceback to the server logs."""
+    traceback.print_exc()
+    # Return a JSON response instead of HTML so the frontend can parse errors reliably
+    return jsonify({'error': 'Internal Server Error', 'details': str(e)}), 500
