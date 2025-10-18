@@ -1,7 +1,7 @@
 FROM python:3.11-slim
 
 # Set working directory
-WORKDIR /app
+WORKDIR Conference-setup/app
 
 # Copy app code
 COPY Conference-setup/app.py /app/
