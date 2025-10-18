@@ -1,17 +1,14 @@
 FROM python:3.11-slim
 
 # Set working directory
-WORKDIR Conference-setup/app
-
-# Copy app code
-COPY Conference-setup/app.py /app/
-
-# Copy templates
-COPY Conference-setup/templates/ /app/templates/
+WORKDIR /app
 
 # Copy requirements and install dependencies
-COPY Conference-setup/requirements.txt /app/
+COPY Conference-setup/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY Conference-setup/ /app/
 
 # Expose port
 EXPOSE 5000
