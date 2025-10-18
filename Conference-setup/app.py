@@ -52,21 +52,15 @@ class Room(db.Model):
 
 class Booking(db.Model):
     __tablename__ = 'bookings'
-    
     id = db.Column(db.Integer, primary_key=True)
-    room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'), nullable=False)
+    room_id = db.Column(db.Integer, nullable=False)
     name = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(120), nullable=False)
+    email = db.Column(db.String(100), nullable=False)
     date = db.Column(db.Date, nullable=False)
     time = db.Column(db.Time, nullable=False)
-    duration = db.Column(db.Integer, nullable=False)  # in minutes
+    duration = db.Column(db.Integer, nullable=False)
     attendees = db.Column(db.Integer, nullable=False)
-    purpose = db.Column(db.Text)
-    price = db.Column(db.Float, nullable=False)  # Total price in rupees
-    status = db.Column(db.String(20), default='confirmed')  # confirmed, cancelled, completed
-    modification_count = db.Column(db.Integer, default=0)  # Track number of modifications
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    purpose = db.Column(db.String(255))
     
     def to_dict(self):
         return {
