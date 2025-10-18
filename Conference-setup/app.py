@@ -217,7 +217,7 @@ def delete_room(room_id):
 
 # Routes - Bookings
 @app.route('/api/bookings', methods=['GET'])
-def list_bookings():  # Changed function name from get_bookings
+def bookings():
     """Get all bookings with optional filters"""
     room_id = request.args.get('room_id', type=int)
     date = request.args.get('date')
@@ -240,7 +240,7 @@ def list_bookings():  # Changed function name from get_bookings
 
 
 @app.route('/api/bookings/<int:booking_id>', methods=['GET'])
-def get_single_booking(booking_id):  # Changed function name
+def get_single_booking(booking_id):
     """Get a specific booking"""
     booking = Booking.query.get_or_404(booking_id)
     return jsonify(booking.to_dict()), 200
@@ -287,88 +287,49 @@ def check_availability():
         return jsonify({'error': str(e)}), 400
 
 #create_booking
+# Create tables if they don't exist
+with app.app_context():
+    db.create_all()
+
 @app.route('/api/bookings', methods=['POST'])
-def create_new_booking():  # Changed function name from create_booking
-    """Create a new booking"""
-    
-    # Add debug logging
-    print("=== CREATE BOOKING REQUEST ===")
-    print(f"Content-Type: {request.content_type}")
-    print(f"Method: {request.method}")
-    
-    data = request.get_json()
-    print(f"Request data: {data}")
-    
-    if not data:
-        return jsonify({'error': 'No JSON data provided'}), 400
-    
-    # Validate required fields
-    required_fields = ['room_id', 'name', 'email', 'date', 'time', 'duration', 'attendees']
-    missing_fields = [field for field in required_fields if field not in data]
-    
-    if missing_fields:
-        return jsonify({'error': f'Missing required fields: {", ".join(missing_fields)}'}), 400
-    
-    # Check if room exists
-    room = Room.query.get(data['room_id'])
-    if not room:
-        return jsonify({'error': 'Room not found'}), 404
-    
-    # Check if room is available
-    if not room.is_available:
-        return jsonify({'error': 'Room is not available'}), 400
-    
-    # Check if room has enough capacity
-    if data['attendees'] > room.capacity:
-        return jsonify({'error': f'Room capacity is {room.capacity}, cannot accommodate {data["attendees"]} attendees'}), 400
-    
-    # Parse date and time
+def create_booking():
     try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'Invalid JSON data'}), 400
+
+        # Validate required fields
+        required_fields = ['room_id', 'name', 'email', 'date', 'time', 'duration', 'attendees']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({'error': f'Missing field: {field}'}), 400
+
+        # Convert date and time
         booking_date = datetime.strptime(data['date'], '%Y-%m-%d').date()
         booking_time = datetime.strptime(data['time'], '%H:%M').time()
-        duration = int(data['duration'])
-    except ValueError as e:
-        return jsonify({'error': f'Invalid date or time format: {str(e)}'}), 400
-    
-    # Validate duration (must be positive and reasonable)
-    if duration <= 0 or duration > 480:  # Max 8 hours
-        return jsonify({'error': 'Duration must be between 1 and 480 minutes'}), 400
-    
-    # Check for time conflicts
-    has_conflict, conflict_message = check_time_conflict(
-        data['room_id'], booking_date, booking_time, duration
-    )
-    
-    if has_conflict:
-        return jsonify({'error': conflict_message}), 409
-    
-    # Calculate price
-    price = calculate_price(room.name, duration)
-    
-    # Create booking
-    booking = Booking(
-        room_id=data['room_id'],
-        name=data['name'],
-        email=data['email'],
-        date=booking_date,
-        time=booking_time,
-        duration=duration,
-        attendees=data['attendees'],
-        purpose=data.get('purpose', ''),
-        price=price,
-        status='confirmed',
-        modification_count=0
-    )
-    
-    try:
-        db.session.add(booking)
+
+        new_booking = Booking(
+            room_id=data['room_id'],
+            name=data['name'],
+            email=data['email'],
+            date=booking_date,
+            time=booking_time,
+            duration=data['duration'],
+            attendees=data['attendees'],
+            purpose=data.get('purpose', '')
+        )
+
+        db.session.add(new_booking)
         db.session.commit()
-        print(f"Booking created successfully: {booking.id}")
-        return jsonify(booking.to_dict()), 201
+
+        return jsonify({'id': new_booking.id}), 201
+
     except Exception as e:
         db.session.rollback()
-        print(f"Error creating booking: {str(e)}")
-        return jsonify({'error': f'Database error: {str(e)}'}), 400
+        return jsonify({'error': str(e)}), 500
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=True)
 
 #modify_booking
 @app.route('/api/bookings/<int:booking_id>', methods=['PUT'])
