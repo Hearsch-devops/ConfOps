@@ -653,17 +653,37 @@
                     body: JSON.stringify(bookingData)
                 });
 
-                const result = await response.json();
+                // Helper to safely parse JSON, falling back to raw text
+                async function safeParseJson(resp) {
+                    const text = await resp.text();
+                    try {
+                        return { parsed: JSON.parse(text), raw: text };
+                    } catch (err) {
+                        return { parsed: null, raw: text };
+                    }
+                }
+
+                const { parsed: result, raw } = await safeParseJson(response);
 
                 if (response.ok) {
-                    showAlert(`Booking Confirmed! Your Booking ID is: ${result.id}. Save this ID to change your reservation.`, 'success');
+                    if (result && result.id) {
+                        showAlert(`Booking Confirmed! Your Booking ID is: ${result.id}. Save this ID to change your reservation.`, 'success');
+                    } else {
+                        // Successful status but response not JSON or missing expected fields
+                        console.warn('Booking succeeded but response body was not JSON or missing id:', raw);
+                        showAlert('Booking confirmed, but server returned an unexpected response. Check console for details.', 'success');
+                    }
                     e.target.reset();
                     document.getElementById('priceAmount').textContent = '₹0';
                 } else {
-                    showAlert(result.error || 'Booking failed. Please try again.', 'error');
+                    // Non-2xx response: prefer JSON error message, otherwise raw text
+                    const message = (result && (result.error || result.message)) || raw || 'Booking failed. Please try again.';
+                    console.error('Booking failed:', response.status, message);
+                    showAlert(message, 'error');
                 }
             } catch (error) {
-                showAlert('Error creating booking: ' + error.message, 'error');
+                console.error('Fetch error creating booking:', error);
+                showAlert('Error creating booking: ' + (error.message || error), 'error');
             }
         }
 

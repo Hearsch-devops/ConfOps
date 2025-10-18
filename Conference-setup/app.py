@@ -372,7 +372,7 @@ def create_new_booking():  # Changed function name from create_booking
 
 #modify_booking
 @app.route('/api/bookings/<int:booking_id>', methods=['PUT'])
-def modify_booking(booking_id):  # Changed function name
+def modify_booking(booking_id):
     """Update a booking (only allowed once, room cannot be changed)"""
     booking = Booking.query.get_or_404(booking_id)
     data = request.get_json()
@@ -450,7 +450,7 @@ def modify_booking(booking_id):  # Changed function name
 
 #remove/delete_booking
 @app.route('/api/bookings/<int:booking_id>', methods=['DELETE'])
-def remove_booking(booking_id):  # Changed function name
+def remove_booking(booking_id):
     """Delete/Cancel a booking"""
     booking = Booking.query.get_or_404(booking_id)
     
