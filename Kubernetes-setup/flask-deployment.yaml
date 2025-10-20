@@ -19,7 +19,7 @@ spec:
         - containerPort: 5000
         env:
         - name: DATABASE_URL
-          value: "postgresql://conf_user:conf_pass@postgres-svc:5432/conference_db"
+          value: "postgresql://conf_user:conf_pass@postgres:5432/conference_db"
 ---
 apiVersion: v1
 kind: Service
