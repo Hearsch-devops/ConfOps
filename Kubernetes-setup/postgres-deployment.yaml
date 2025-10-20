@@ -13,17 +13,23 @@ spec:
         app: postgres
     spec:
       containers:
-        - name: postgres
-          image: postgres:15
-          env:
-            - name: POSTGRES_USER
-              value: "conf_user"
-            - name: POSTGRES_PASSWORD
-              value: "conf_pass"
-            - name: POSTGRES_DB
-              value: "conf_db"
-          ports:
-            - containerPort: 5432
+      - name: postgres
+        image: postgres:15
+        ports:
+          - containerPort: 5432
+        env:
+          - name: POSTGRES_USER
+            value: "conf_user"
+          - name: POSTGRES_PASSWORD
+            value: "password"
+          - name: POSTGRES_DB
+            value: "conf_db"
+          - name: POSTGRES_HOST_AUTH_METHOD
+            value: "trust"
+          - name: PGDATA
+            value: "/var/lib/postgresql/data"
+        args: ["-c", "listen_addresses=*"]
+
 ---
 apiVersion: v1
 kind: Service
