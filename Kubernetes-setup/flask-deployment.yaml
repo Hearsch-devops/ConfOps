@@ -26,10 +26,9 @@ kind: Service
 metadata:
   name: flask-service
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
-    app: flask
+    app: postgres
   ports:
-    - port: 5000
-      targetPort: 5000
-      nodePort: 30500
+    - port: 5432
+      targetPort: 5432
