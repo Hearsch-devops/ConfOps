@@ -486,7 +486,7 @@ def health_check():
     return jsonify({'status': 'healthy', 'database': 'connected'}), 200
 
 
-@app.route('/api/init-db', methods=['POST'])
+@app.route('/api/init-db', methods=['GET'])
 def init_database():
     """Initialize database with sample data"""
     try:
