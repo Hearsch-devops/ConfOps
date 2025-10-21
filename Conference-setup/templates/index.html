@@ -498,25 +498,55 @@
             'Innovation Hub': 1500,
             'Focus Room': 500
         };
-
+    
         let roomsData = [
             {id: 1, name: 'Executive Board Room', capacity: 12, floor: 5, description: 'Premium board room with video conferencing and whiteboard', is_available: true},
             {id: 2, name: 'Innovation Hub', capacity: 8, floor: 3, description: 'Creative space with brainstorming tools and collaboration tech', is_available: true},
             {id: 3, name: 'Focus Room', capacity: 4, floor: 2, description: 'Small meeting room perfect for team discussions', is_available: true}
         ];
-
-        // Load rooms on page load
+    
+        // -------------------------------
+        // 1️⃣ Database Initialization
+        // -------------------------------
+        async function initDatabase() {
+            try {
+                const response = await fetch(`${API_URL}/init-db`, {
+                    method: 'POST',           // Must be POST
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+    
+                const data = await response.json();
+    
+                if (response.ok) {
+                    console.log('DB Init:', data.message);
+                    showAlert(data.message, 'success');
+                } else {
+                    console.warn('DB Init failed:', data.error || data.message);
+                    showAlert(data.error || data.message || 'DB initialization failed', 'error');
+                }
+            } catch (err) {
+                console.error('DB Init request failed:', err);
+                showAlert('DB initialization request failed: ' + err.message, 'error');
+            }
+        }
+    
+        // -------------------------------
+        // 2️⃣ Load rooms and setup page
+        // -------------------------------
         document.addEventListener('DOMContentLoaded', async () => {
-            await loadRooms();
+            await initDatabase();   // Initialize DB first
+            await loadRooms();      // Then load rooms
             setMinDate();
         });
-
+    
         function setMinDate() {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('date').setAttribute('min', today);
             document.getElementById('changeDate').setAttribute('min', today);
         }
-
+    
         async function loadRooms() {
             try {
                 const response = await fetch(`${API_URL}/rooms`);
@@ -530,7 +560,7 @@
                 populateRoomSelects(roomsData);
             }
         }
-
+    
         function populateRoomSelects(rooms) {
             const bookingSelect = document.getElementById('roomId');
             
@@ -540,13 +570,13 @@
             
             bookingSelect.innerHTML = '<option value="">Select a room</option>' + options;
         }
-
+    
         function openBookingForm(roomId, roomName) {
             document.getElementById('roomId').value = roomId;
             updatePricing();
             document.getElementById('bookingForm').scrollIntoView({ behavior: 'smooth' });
         }
-
+    
         function updatePricing() {
             const roomId = document.getElementById('roomId').value;
             const duration = parseInt(document.getElementById('duration').value) || 0;
@@ -560,7 +590,7 @@
                 }
             }
         }
-
+    
         function updateChangePricing() {
             const roomId = document.getElementById('changeRoomId').value;
             const duration = parseInt(document.getElementById('changeDuration').value) || 0;
@@ -574,13 +604,16 @@
                 }
             }
         }
-
+    
+        // -------------------------------
+        // 3️⃣ Booking availability checks
+        // -------------------------------
         async function checkAvailability() {
             const roomId = document.getElementById('roomId').value;
             const date = document.getElementById('date').value;
             const time = document.getElementById('time').value;
             const duration = parseInt(document.getElementById('duration').value) || 0;
-
+    
             if (roomId && date && time && duration) {
                 try {
                     const response = await fetch(`${API_URL}/bookings/check-availability`, {
@@ -599,14 +632,14 @@
                 }
             }
         }
-
+    
         async function checkChangeAvailability() {
             const roomId = document.getElementById('changeRoomId').value;
             const date = document.getElementById('changeDate').value;
             const time = document.getElementById('changeTime').value;
             const duration = parseInt(document.getElementById('changeDuration').value) || 0;
             const bookingId = document.getElementById('bookingId').value;
-
+    
             if (roomId && date && time && duration) {
                 try {
                     const response = await fetch(`${API_URL}/bookings/check-availability`, {
@@ -631,7 +664,10 @@
                 }
             }
         }
-
+    
+        // -------------------------------
+        // 4️⃣ Booking submission
+        // -------------------------------
         async function handleBookingSubmit(e) {
             e.preventDefault();
             
@@ -645,48 +681,31 @@
                 attendees: parseInt(document.getElementById('attendees').value),
                 purpose: document.getElementById('purpose').value
             };
-
+    
             try {
                 const response = await fetch(`${API_URL}/bookings`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(bookingData)
                 });
-
-                // Helper to safely parse JSON, falling back to raw text
-                async function safeParseJson(resp) {
-                    const text = await resp.text();
-                    try {
-                        return { parsed: JSON.parse(text), raw: text };
-                    } catch (err) {
-                        return { parsed: null, raw: text };
-                    }
-                }
-
-                const { parsed: result, raw } = await safeParseJson(response);
-
+    
+                const result = await response.json();
+    
                 if (response.ok) {
-                    if (result && result.id) {
-                        showAlert(`Booking Confirmed! Your Booking ID is: ${result.id}. Save this ID to change your reservation.`, 'success');
-                    } else {
-                        // Successful status but response not JSON or missing expected fields
-                        console.warn('Booking succeeded but response body was not JSON or missing id:', raw);
-                        showAlert('Booking confirmed, but server returned an unexpected response. Check console for details.', 'success');
-                    }
+                    showAlert(`Booking Confirmed! Your Booking ID is: ${result.id}. Save this ID to change your reservation.`, 'success');
                     e.target.reset();
                     document.getElementById('priceAmount').textContent = '₹0';
                 } else {
-                    // Non-2xx response: prefer JSON error message, otherwise raw text
-                    const message = (result && (result.error || result.message)) || raw || 'Booking failed. Please try again.';
-                    console.error('Booking failed:', response.status, message);
-                    showAlert(message, 'error');
+                    showAlert(result.error || 'Booking failed. Please try again.', 'error');
                 }
             } catch (error) {
-                console.error('Fetch error creating booking:', error);
-                showAlert('Error creating booking: ' + (error.message || error), 'error');
+                showAlert('Error creating booking: ' + error.message, 'error');
             }
         }
-
+    
+        // -------------------------------
+        // 5️⃣ Load and update existing bookings
+        // -------------------------------
         async function loadBookingDetails() {
             const bookingId = document.getElementById('bookingId').value;
             
@@ -694,7 +713,7 @@
                 showAlert('Please enter a booking ID', 'error');
                 return;
             }
-
+    
             try {
                 const response = await fetch(`${API_URL}/bookings/${bookingId}`);
                 
@@ -702,15 +721,15 @@
                     showAlert('Booking not found', 'error');
                     return;
                 }
-
+    
                 const booking = await response.json();
                 
                 if (booking.modification_count >= 1) {
                     showAlert('This booking has already been modified once. No further changes allowed.', 'error');
                     return;
                 }
-
-                // Populate change form - Room cannot be changed
+    
+                // Populate change form
                 const room = roomsData.find(r => r.id === booking.room_id);
                 document.getElementById('changeRoomName').value = room ? room.name : booking.room_name;
                 document.getElementById('changeRoomId').value = booking.room_id;
@@ -728,7 +747,7 @@
                 showAlert('Error loading booking: ' + error.message, 'error');
             }
         }
-
+    
         async function handleUpdateBooking(e) {
             e.preventDefault();
             
@@ -740,16 +759,16 @@
                 attendees: parseInt(document.getElementById('changeAttendees').value),
                 purpose: document.getElementById('changePurpose').value
             };
-
+    
             try {
                 const response = await fetch(`${API_URL}/bookings/${bookingId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(updateData)
                 });
-
+    
                 const result = await response.json();
-
+    
                 if (response.ok) {
                     showAlert('Reservation updated successfully! This was your one-time modification.', 'success');
                     document.getElementById('changeFormDetails').classList.add('hidden');
@@ -761,7 +780,10 @@
                 showAlert('Error updating booking: ' + error.message, 'error');
             }
         }
-
+    
+        // -------------------------------
+        // 6️⃣ Utility: Alerts
+        // -------------------------------
         function showAlert(message, type) {
             const container = document.getElementById('alertContainer');
             const alert = document.createElement('div');
@@ -776,5 +798,6 @@
             container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
     </script>
+    
 </body>
 </html>
