@@ -505,9 +505,9 @@
             {id: 3, name: 'Focus Room', capacity: 4, floor: 2, description: 'Small meeting room perfect for team discussions', is_available: true}
         ];
     
-        // -------------------------------
-        // 1️⃣ Database Initialization
-        // -------------------------------
+
+// Database Initialization
+
         async function initDatabase() {
             try {
                 const response = await fetch(`${API_URL}/init-db`, {
@@ -532,18 +532,14 @@
             }
         }
     
-        // -------------------------------
-        // 2️⃣ Load rooms and setup page
-        // -------------------------------
-        document.addEventListener('DOMContentLoaded', () => {
-       // Run DB init but do not alert user
-            initDatabase().catch(err => console.error(err));
-    
-       // Continue loading rooms and page
-            loadRooms();
-            setMinDate();
-});
 
+//Load rooms and setup page
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await initDatabase();   // Initialize DB first
+            await loadRooms();      // Then load rooms
+            setMinDate();
+        });
     
         function setMinDate() {
             const today = new Date().toISOString().split('T')[0];
@@ -609,9 +605,9 @@
             }
         }
     
-        // -------------------------------
-        // 3️⃣ Booking availability checks
-        // -------------------------------
+
+//Booking availability checks
+
         async function checkAvailability() {
             const roomId = document.getElementById('roomId').value;
             const date = document.getElementById('date').value;
@@ -669,9 +665,9 @@
             }
         }
     
-        // -------------------------------
-        // 4️⃣ Booking submission
-        // -------------------------------
+
+//Booking submission
+
         async function handleBookingSubmit(e) {
             e.preventDefault();
             
@@ -707,9 +703,9 @@
             }
         }
     
-        // -------------------------------
-        // 5️⃣ Load and update existing bookings
-        // -------------------------------
+
+//Load and update existing bookings
+
         async function loadBookingDetails() {
             const bookingId = document.getElementById('bookingId').value;
             
@@ -733,7 +729,7 @@
                     return;
                 }
     
-                // Populate change form
+// Populate change form
                 const room = roomsData.find(r => r.id === booking.room_id);
                 document.getElementById('changeRoomName').value = room ? room.name : booking.room_name;
                 document.getElementById('changeRoomId').value = booking.room_id;
@@ -785,9 +781,9 @@
             }
         }
     
-        // -------------------------------
-        // 6️⃣ Utility: Alerts
-        // -------------------------------
+
+//Utility: Alerts
+
         function showAlert(message, type) {
             const container = document.getElementById('alertContainer');
             const alert = document.createElement('div');
@@ -801,6 +797,7 @@
             
             container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
-    </script>    
+    </script>
+     
 </body>
 </html>
