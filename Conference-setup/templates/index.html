@@ -535,11 +535,15 @@
         // -------------------------------
         // 2️⃣ Load rooms and setup page
         // -------------------------------
-        document.addEventListener('DOMContentLoaded', async () => {
-            await initDatabase();   // Initialize DB first
-            await loadRooms();      // Then load rooms
+        document.addEventListener('DOMContentLoaded', () => {
+       // Run DB init but do not alert user
+            initDatabase().catch(err => console.error(err));
+    
+       // Continue loading rooms and page
+            loadRooms();
             setMinDate();
-        });
+});
+
     
         function setMinDate() {
             const today = new Date().toISOString().split('T')[0];
@@ -797,7 +801,6 @@
             
             container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
-    </script>
-    
+    </script>    
 </body>
 </html>
