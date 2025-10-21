@@ -490,15 +490,12 @@ def health_check():
 def init_database():
     """Initialize database with sample data"""
     try:
-        # Create tables
-        db.create_all()
+        db.create_all()  # Ensure tables exist
         
-        # Check if rooms already exist
         if Room.query.count() > 0:
-           return jsonify({'message': 'Database already initialized'}), 200
+            # Return 204 No Content safely for frontend
+            return jsonify({}), 204
 
-        
-        # Add sample rooms
         rooms = [
             Room(name='Executive Board Room', capacity=12, floor=5, 
                  description='Premium board room with video conferencing and whiteboard',
@@ -510,27 +507,16 @@ def init_database():
                  description='Small meeting room perfect for team discussions',
                  amenities='TV Screen, Whiteboard')
         ]
-        
-        for room in rooms:
-            db.session.add(room)
-        
+
+        db.session.add_all(rooms)
         db.session.commit()
         return jsonify({'message': 'Database initialized successfully'}), 201
+
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': str(e)}), 400
-
-
-if __name__ == '__main__':
-    with app.app_context():
-        try:
-            db.create_all()
-        except Exception as e:
-            # Print detailed DB startup errors to help diagnose connection issues
-            print('Error during DB initialization:')
-            traceback.print_exc()
-    app.run(debug=True, host='0.0.0.0', port=5000)
-
+        # Print error to logs for debugging in pod
+        print(f"DB Initialization Error: {e}")
+        return jsonify({'error': str(e)}), 500
 
 @app.errorhandler(Exception)
 def handle_uncaught_exception(e):
