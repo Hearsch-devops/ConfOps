@@ -496,6 +496,7 @@ def init_database():
         # Check if rooms already exist
         #if Room.query.count() > 0:
         #    return jsonify({'message': 'Database already initialized'}), 200
+        #testing new query
          if Room.query.count() > 0:
              return '', 204
         
