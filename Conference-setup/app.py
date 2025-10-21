@@ -136,7 +136,7 @@ def home():
     """Serve the main HTML file"""
     try:
         # Try to serve from current directory
-        return send_from_directory('.', 'index.html')
+        return render_template('.', 'index.html')
     except Exception as e:
         print(f"Error serving index.html: {str(e)}", file=sys.stderr)
         return jsonify({'error': 'index.html not found', 'details': str(e)}), 404
