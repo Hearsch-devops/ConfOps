@@ -511,7 +511,7 @@
         async function initDatabase() {
             try {
                 const response = await fetch(`${API_URL}/init-db`, {
-                    method: 'POST',           // Must be POST
+                    method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     }
@@ -797,7 +797,6 @@
             
             container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
-    </script>
-     
+    </script>   
 </body>
 </html>

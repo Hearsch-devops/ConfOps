@@ -494,8 +494,10 @@ def init_database():
         db.create_all()
         
         # Check if rooms already exist
-        if Room.query.count() > 0:
-            return jsonify({'message': 'Database already initialized'}), 200
+        #if Room.query.count() > 0:
+        #    return jsonify({'message': 'Database already initialized'}), 200
+         if Room.query.count() > 0:
+             return '', 204
         
         # Add sample rooms
         rooms = [
