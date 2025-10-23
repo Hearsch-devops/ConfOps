@@ -507,34 +507,27 @@
     
 
 // Database Initialization
-
         async function initDatabase() {
             try {
                 const response = await fetch(`${API_URL}/init-db`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
+                method: 'POST',
                 });
-    
-                const data = await response.json();
-    
-                if (response.ok) {
-                    console.log('DB Init:', data.message);
-                    showAlert(data.message, 'success');
+
+        // Only parse JSON if there's content (status ≠ 204)
+                if (response.status !== 204) {
+                    const data = await response.json();
+                    console.log('DB initialization:', data.message || data);
                 } else {
-                    console.warn('DB Init failed:', data.error || data.message);
-                    showAlert(data.error || data.message || 'DB initialization failed', 'error');
+            console.log('Database already initialized (204 No Content)');
                 }
-            } catch (err) {
-                console.error('DB Init request failed:', err);
-                showAlert('DB initialization request failed: ' + err.message, 'error');
+            } catch (error) {
+                console.error('Database initialization failed:', error);
             }
         }
+
     
 
 //Load rooms and setup page
-
         document.addEventListener('DOMContentLoaded', async () => {
             await initDatabase();   // Initialize DB first
             await loadRooms();      // Then load rooms
@@ -607,7 +600,6 @@
     
 
 //Booking availability checks
-
         async function checkAvailability() {
             const roomId = document.getElementById('roomId').value;
             const date = document.getElementById('date').value;
@@ -667,7 +659,6 @@
     
 
 //Booking submission
-
         async function handleBookingSubmit(e) {
             e.preventDefault();
             
@@ -705,7 +696,6 @@
     
 
 //Load and update existing bookings
-
         async function loadBookingDetails() {
             const bookingId = document.getElementById('bookingId').value;
             
@@ -783,7 +773,6 @@
     
 
 //Utility: Alerts
-
         function showAlert(message, type) {
             const container = document.getElementById('alertContainer');
             const alert = document.createElement('div');
