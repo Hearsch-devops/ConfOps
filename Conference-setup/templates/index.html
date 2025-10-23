@@ -659,40 +659,30 @@
     
 
 //Booking submission
-        async function handleBookingSubmit(e) {
-            e.preventDefault();
-            
-            const bookingData = {
-                room_id: parseInt(document.getElementById('roomId').value),
-                name: document.getElementById('name').value,
-                email: document.getElementById('email').value,
-                date: document.getElementById('date').value,
-                time: document.getElementById('time').value,
-                duration: parseInt(document.getElementById('duration').value),
-                attendees: parseInt(document.getElementById('attendees').value),
-                purpose: document.getElementById('purpose').value
-            };
+if (response.ok) {
+    showAlert(`Booking Confirmed! Your Booking ID is: ${result.id}. Save this ID to change your reservation.`, 'success');
     
-            try {
-                const response = await fetch(`${API_URL}/bookings`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(bookingData)
-                });
-    
-                const result = await response.json();
-    
-                if (response.ok) {
-                    showAlert(`Booking Confirmed! Your Booking ID is: ${result.id}. Save this ID to change your reservation.`, 'success');
-                    e.target.reset();
-                    document.getElementById('priceAmount').textContent = '₹0';
-                } else {
-                    showAlert(result.error || 'Booking failed. Please try again.', 'error');
-                }
-            } catch (error) {
-                showAlert('Error creating booking: ' + error.message, 'error');
-            }
-        }
+    // Trigger n8n webhook for email
+    fetch('https://hearschdev.app.n8n.cloud/webhook-test/c3b4d67c-29ec-4d82-a092-c01e0547ec12', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            booking_id: result.id,
+            room_name: bookingData.room_id, // you may want to send room name
+            name: bookingData.name,
+            email: bookingData.email,
+            date: bookingData.date,
+            time: bookingData.time,
+            duration: bookingData.duration,
+            attendees: bookingData.attendees,
+            purpose: bookingData.purpose
+        })
+    });
+
+    e.target.reset();
+    document.getElementById('priceAmount').textContent = '₹0';
+}
+
     
 
 //Load and update existing bookings
