@@ -39,6 +39,9 @@ deploy:
     - kubectl config view
   script:
     - kubectl get nodes --insecure-skip-tls-verify
+    - echo "Applying namespace manifests first"
+    - kubectl apply -f Kubernetes-setup/**/namespace-*.yaml || true
+    - echo "Applying remaining Kubernetes manifests"
     - kubectl apply -f Kubernetes-setup/
     - kubectl set image deployment/flask-deployment flask="$IMAGE_NAME:$CI_COMMIT_SHORT_SHA" --record
     - kubectl rollout status deployment/flask-deployment
