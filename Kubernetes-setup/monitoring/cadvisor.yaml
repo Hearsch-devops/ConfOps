@@ -17,10 +17,6 @@ spec:
       containers:
         - name: cadvisor
           image: gcr.io/cadvisor/cadvisor:v0.47.2
-          ports:
-            - containerPort: 8080
-              hostPort: 8080
-              name: http
           resources:
             requests:
               cpu: 100m
