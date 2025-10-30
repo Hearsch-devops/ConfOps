@@ -1,0 +1,180 @@
+{
+  "name": "conference-room",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "c3b4d67c-29ec-4d82-a092-c01e0547ec12",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -576,
+        80
+      ],
+      "id": "e0055c4d-53e5-4d83-94af-b889099aa228",
+      "name": "Receive Booking Webhook",
+      "webhookId": "c3b4d67c-29ec-4d82-a092-c01e0547ec12"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "name",
+              "value": "={{ $json.body.name }}"
+            },
+            {
+              "name": "email",
+              "value": "={{ $json.body.email }}"
+            },
+            {
+              "name": "booking_id",
+              "value": "={{ $json.body.booking_id }}"
+            },
+            {
+              "name": "date",
+              "value": "={{ $json.body.date }}"
+            },
+            {
+              "name": "time",
+              "value": "={{ $json.body.time }}"
+            },
+            {
+              "name": "duration",
+              "value": "={{ $json.body.duration }}"
+            },
+            {
+              "name": "attendees",
+              "value": "={{ $json.body.attendees }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        -320,
+        80
+      ],
+      "id": "149e6380-e958-4316-ac9b-b9380200e8b1",
+      "name": "Prepare Booking Data"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "Conference Room Booking Confirmation!",
+        "emailType": "text",
+        "message": "=📌 Booking Confirmation \nName: {{ $json.name }}\nBooking ID: {{ $json.booking_id }} \nDate: {{ $json.date }}\nTime: {{ $json.time }}\nDuration: {{ $json.duration }}\nAttendees: {{ $json.attendees }}\nPlease retain your Booking ID for any future modifications to this reservation.",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "8157c2e6-edc7-4a01-853d-4df8aceccdab",
+      "name": "Send Booking Confirmation Email",
+      "webhookId": "872fb335-fc49-4b33-8dba-472dc3f95ff4",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "zUh11jkAFLaHTmqS",
+          "name": "DevAutoFlow"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C09LDCBQ5PV",
+          "mode": "list",
+          "cachedResultName": "conference-room-booking"
+        },
+        "text": "=:new: *New Reservation Received!*\n*Name:* {{ $json.name }}\n*Booking ID:* {{ $json.booking_id }}\n*Date:* {{ $json.date }}\n*Time:* {{ $json.time }}\n*Duration:* {{ $json.duration }} minutes\n*Attendees:* {{ $json.attendees }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        0,
+        176
+      ],
+      "id": "e4bba1c1-c778-4acd-9f80-277cf8a770d2",
+      "name": "Send Slack Notification",
+      "webhookId": "8cd4dea0-91e9-4632-ace3-3b36a7be62ec",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "pI7g7ocqkbk3v4wP",
+          "name": "Slack account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Receive Booking Webhook": {
+      "main": [
+        [
+          {
+            "node": "Prepare Booking Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Booking Data": {
+      "main": [
+        [
+          {
+            "node": "Send Booking Confirmation Email",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Slack Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "faabd945-aa71-4c37-9ec9-84cd274e9782",
+  "meta": {
+    "instanceId": "2a8cd182b968682f048df4182b50120fa2d67328877c0bf931c50a7bd623ceb6"
+  },
+  "id": "jr4D8BuztNlSaK8t",
+  "tags": [
+    {
+      "name": "email",
+      "id": "omJRykMLuoQVwpKC",
+      "createdAt": "2025-10-23T10:51:37.685Z",
+      "updatedAt": "2025-10-23T10:51:37.685Z"
+    },
+    {
+      "createdAt": "2025-10-21T12:48:57.458Z",
+      "updatedAt": "2025-10-21T12:48:57.458Z",
+      "id": "iuTboOrgWXXMRelZ",
+      "name": "notifications"
+    },
+    {
+      "name": "conference-room",
+      "id": "xKFSrn339DAIqoBj",
+      "createdAt": "2025-10-23T10:51:57.762Z",
+      "updatedAt": "2025-10-23T10:51:57.762Z"
+    }
+  ]
+}
