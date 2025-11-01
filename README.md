@@ -1,31 +1,27 @@
-🚀 My Latest DevOps Project – Conference Room Booking System!
+From Docker to Kubernetes to GitLab CI/CD to n8n — bringing all the pieces of DevOps together into one complete automation project 🔥
 
-I built a fully responsive Conference Room Booking Application leveraging AI-assisted prompt engineering with Clude.ai, and implementing workflow automation using n8n. This project integrates frontend, backend, automation, and observability into one seamless system.
+🚀 Excited to share my latest DevOps project: Conference Room Booking System!
 
-✨ Highlights:
+🏢 Why Use a Conference Room Booking System?
+In modern meeting's, managing meeting spaces efficiently is essential for productivity and collaboration. A Conference Room Booking System solves common workplace challenges by
+providing automation, visibility, and control.
 
-🖥️ Responsive HTML/CSS/JS frontend
+🧩 Technical Highlights:
+This project demonstrates end-to-end DevOps workflows, integrating multiple tools across the DevOps lifecycle:
+🐳 Dockerized Flask backend + PostgreSQL
+☸️ Kubernetes deployment with GitLab CI/CD automation
+📊 Monitoring & alerting using Prometheus and Grafana
+🤖 Workflow automation via n8n (email & Slack notifications)
+🧠 AI-assisted prompt engineering using Claude.ai
 
-🧠 Flask (Python) API with PostgreSQL
+🎯 Learning Objectives:
+✅ CI/CD pipelines using GitLab Runners
+✅ Microservice deployment on Kubernetes
+✅ Automated observability with Prometheus + Grafana
+✅ Workflow automation using n8n
+✅ Building AI-driven DevOps workflows
 
-⚙️ Docker, Kubernetes, Prometheus, Grafana, GitLab CI/CD
+📸 Visuals: Conference_Room_Booking_Screenshots.pdf
+💻 Project GitHub: https://github.com/Hearsch-devops/ConfOps.git
 
-✉️ Automation: Triggering email confirmations to users and Slack notifications to the team via n8n workflows
-
-💾 Features:
-
-Real-time room availability
-
-Dynamic price calculation
-
-One-time booking modification via Booking ID
-
-Instant reservation alerts
-
-🖼️ Screenshots:
-
-See: Conference_Room_Booking_Screenshots.pdf
-
-🔍 Goal: Streamline meeting room bookings while showcasing end-to-end DevOps workflows — from development to deployment and automated notifications.
-
-#DevOps #Kubernetes #Flask #Automation #n8n #GitLabCI/CD #Grafana #Prometheus #Python #Docker #PostgreSQL #FullStack #ProjectShowcase #Clude.ai #n8nworkflow
+#DevOps #Kubernetes #GitLabCI #Docker #Grafana #Prometheus #Loki #Python #Flask #Automation #n8n #ProjectShowcase
