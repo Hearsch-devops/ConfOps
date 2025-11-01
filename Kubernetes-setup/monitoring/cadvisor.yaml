@@ -14,9 +14,13 @@ spec:
       labels:
         name: cadvisor
     spec:
+      automountServiceAccountToken: false
       containers:
         - name: cadvisor
           image: gcr.io/cadvisor/cadvisor:v0.47.2
+          ports:
+            - containerPort: 8080
+              name: http
           resources:
             requests:
               cpu: 100m
@@ -61,6 +65,7 @@ spec:
           operator: Exists
           effect: NoSchedule
 ---
+# cAdvisor NodePort Service
 apiVersion: v1
 kind: Service
 metadata:
