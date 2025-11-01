@@ -22,6 +22,7 @@ This project demonstrates end-to-end DevOps workflows, integrating multiple tool
 ✅ Building AI-driven DevOps workflows
 
 📸 Visuals: Conference_Room_Booking_Screenshots.pdf
+
 💻 Project GitHub: https://github.com/Hearsch-devops/ConfOps.git
 
 #DevOps #Kubernetes #GitLabCI #Docker #Grafana #Prometheus #Loki #Python #Flask #Automation #n8n #ProjectShowcase
