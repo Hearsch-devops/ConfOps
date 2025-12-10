@@ -13,7 +13,8 @@ This project demonstrates end-to-end DevOps workflows, integrating multiple tool
 📊 Monitoring & alerting using Prometheus and Grafana
 🤖 Workflow automation via n8n (email & Slack notifications)
 🧠 AI-assisted prompt engineering using Claude.ai
-
+AIops:
+Integrated AIOps using K8sGPT with Qwen2-1.5B (Ollama) to enable AI-powered diagnostics, automated troubleshooting, and intelligent root-cause analysis for Kubernetes workloads.
 🎯 Learning Objectives:
 ✅ CI/CD pipelines using GitLab Runners
 ✅ Microservice deployment on Kubernetes
