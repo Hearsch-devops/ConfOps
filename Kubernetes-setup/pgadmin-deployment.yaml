@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: pgadmin
+  namespace: conference-room
 spec:
   replicas: 1
   selector:
@@ -12,6 +13,8 @@ spec:
       labels:
         app: pgadmin
     spec:
+      nodeSelector:
+        node-type: back
       containers:
         - name: pgadmin
           image: dpage/pgadmin4
@@ -27,6 +30,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: pgadmin
+  namespace: conference-room
 spec:
   type: NodePort
   selector:
