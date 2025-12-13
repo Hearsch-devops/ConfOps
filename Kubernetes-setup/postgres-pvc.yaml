@@ -11,12 +11,13 @@ spec:
   storageClassName: manual
   nfs:
     path: /mnt/nfs/ConferenceRoomData
-    server: 192.168.48.144
+    server: 192.168.48.164
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: postgres-pvc
+  namespace: conference-room
 spec:
   accessModes:
     - ReadWriteOnce
