@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontend-deployment
+  namespace: conference-room
 spec:
   replicas: 1
   selector:
@@ -12,6 +13,8 @@ spec:
       labels:
         app: frontend
     spec:
+      nodeSelector:
+        node-type: app
       containers:
         - name: nginx
           image: nginx:latest
@@ -44,6 +47,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: frontend-service
+  namespace: conference-room
 spec:
   type: NodePort
   ports:
