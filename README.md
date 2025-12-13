@@ -17,6 +17,9 @@ This project demonstrates end-to-end DevOps workflows, integrating multiple tool
 AIops:
 Integrated AIOps using K8sGPT with Qwen2-1.5B (Ollama) to enable AI-powered diagnostics, automated troubleshooting, and intelligent root-cause analysis for Kubernetes workloads.
 
+Note: 
+Attached a Bash script folder to simulate real booking lifecycles.
+
 🎯 Learning Objectives:
 ✅ CI/CD pipelines using GitLab Runners
 ✅ Microservice deployment on Kubernetes
